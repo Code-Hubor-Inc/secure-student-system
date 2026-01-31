@@ -28,7 +28,7 @@ services:
       - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      intervals: 10s
+      interval: 10s
       timeout: 5s
       retries: 5
 
@@ -71,13 +71,13 @@ services:
   # Optional: Database admin 
   pgadmin:
     image: dpage/pgadmin4
-  environment:
-    PGADMIN_DEFAULT_EMAIL: admin@example.com
-    PGADMIN_DEFAULT_PASSWORD: admin
-  ports:
-    - "8080:8080"
-  depends_on:
-    - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
 
   volumes:
     postgres_data:

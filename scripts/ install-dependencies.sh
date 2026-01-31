@@ -2,7 +2,7 @@
 
 set -e
 
-echo "📦 Installing project dependencies..."
+echo "Installing project dependencies..."
 
 # Frontend dependencies
 echo "Installing frontend dependencies..."
@@ -19,4 +19,4 @@ pip install --upgrade pip
 pip install -r requirements.txt
 cd ..
 
-echo "✅ All dependencies installed!"
+echo "All dependencies installed!"

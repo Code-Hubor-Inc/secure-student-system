@@ -64,7 +64,7 @@ jobs:
         
     - name: Run npm audit
       run: |
-        if [ -d "frontend"]; then
+        if [ -d "frontend" ]; then
           cd frontend
           npm audit --audit-level high
         else
@@ -79,12 +79,12 @@ jobs:
         
     - name: Run safety check
       run: |
-        if [ -d "backend"]; then
+        if [ -d "backend" ]; then
           cd backend
           pip install safety
           safety check --full-report
         else
-          echo "Backend directory not found, skipping safet check "
+          echo "Backend directory not found, skipping safety check"
         fi    
 
     - name: Run Trivy vulnerability scanner
@@ -127,12 +127,12 @@ jobs:
     - name: Build container images
       if: steps.dockerfile_check.outputs.has_frontend_dockerfile == 'true' || steps.dockerfile_check.outputs.has_backend_dockerfile == 'true'
       run: |
-        if [ "${{ steps.dockerfile_check.outputs.has_frontend_dockerfile }}" = "true"]; then
-            docker build -t frontend-security-scan -f frontend/Dockerfile ./frontend
-          fi
-          if [ "${{ steps.dockerfile_check.outputs.has_backend_dockerfile }}" = "true"]; then
-            docker build -t backend-security-scan -f backend/Dockerfile ./backend
-          fi
+        if [ "${{ steps.dockerfile_check.outputs.has_frontend_dockerfile }}" = "true" ]; then
+          docker build -t frontend-security-scan -f frontend/Dockerfile ./frontend
+        fi
+        if [ "${{ steps.dockerfile_check.outputs.has_backend_dockerfile }}" = "true" ]; then
+          docker build -t backend-security-scan -f backend/Dockerfile ./backend
+        fi
 
     - name: Scan frontend container
       if: steps.dockerfile_check.outputs.has_frontend_dockerfile == 'true'

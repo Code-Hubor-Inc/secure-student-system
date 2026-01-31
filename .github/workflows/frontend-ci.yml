@@ -77,7 +77,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/setup-node@v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -92,9 +92,9 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Build Docker iage
+      - name: Build Docker image
         run: |
-          docker build -t frontend:${{ github.sha }}
+          docker build -t frontend:${{ github.sha }} -f frontend/Dockerfile ./frontend
 
       - name: Run security audit
         run: |
@@ -128,15 +128,15 @@ jobs:
             --health-retries 5
 
         postgres:
-          image: postgres 13
+          image: postgres:13
           env:
             POSTGRES_USER: test
             POSTGRES_PASSWORD: test
             POSTGRES_DB: test
           ports:
             - "5432:5432"
-          options: >-
-            --health-cd pg_isready
+          options: >
+            --health-cmd "pg_isready -U test"
             --health-interval 10s
             --health-timeout 5s
             --health-retries 5
@@ -165,9 +165,9 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
-      - name: Build for intergration test
+      - name: Build for integration test
         working-directory: ./frontend
         run: |
           npm run test:Integration
         env:
-          VTTF_API_BASE_URL: http://localhost:8000/api/v1
+          VITE_API_BASE_URL: http://localhost:8000/api/v1

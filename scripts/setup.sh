@@ -1,11 +1,11 @@
 
-### 📄 **scripts/setup.sh**
+### **scripts/setup.sh**
 ```bash
 #!/bin/bash
 
 set -e  # Exit on any error
 
-echo "🚀 Setting up Secure Student System..."
+echo " Setting up Secure Student System..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,15 +15,15 @@ NC='\033[0m' # No Color
 
 # Function to print colored output
 print_status() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN} $1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW} $1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED} $1${NC}"
 }
 
 # Check prerequisites
@@ -62,7 +62,7 @@ fi
 print_status "Python version: $PYTHON_VERSION"
 
 # Frontend setup
-echo "📦 Setting up frontend..."
+echo "Setting up frontend..."
 cd frontend
 if [ ! -d "node_modules" ]; then
     npm install
@@ -73,7 +73,7 @@ fi
 cd ..
 
 # Backend setup
-echo "🐍 Setting up backend..."
+echo "Setting up backend..."
 cd backend
 if [ ! -d "venv" ]; then
     python3 -m venv venv
@@ -143,12 +143,12 @@ fi
 # Make scripts executable
 chmod +x scripts/*.sh
 
-print_status "Setup complete! 🎉"
+print_status "Setup complete!"
 echo ""
-echo "📝 Next steps:"
+echo " Next steps:"
 echo "1. Configure your .env files in both frontend/ and backend/ directories"
 echo "2. Run: docker-compose up -d  to start the database and services"
 echo "3. Run: npm run dev  to start development servers"
 echo "4. Open http://localhost:3000 in your browser"
 echo ""
-echo "📚 For more details, see docs/GETTING_STARTED.md"
+echo " For more details, see docs/GETTING_STARTED.md"
