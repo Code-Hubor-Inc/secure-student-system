@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Database
   postgres:
     image: postgres:13
     environment:
@@ -12,14 +11,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - .scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d secure_student"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis for caching session
   redis:
     image: redis:7-alpine
     ports:
@@ -32,11 +29,10 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
   backend:
-    build: 
-      context: ./backend
-      dockerfile: dockerfile
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -47,15 +43,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      volumes:
-         - ./backend:/app
-         - file_storage:/app/storage
-      command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../backend:/app
+      - file_storage:/app/storage
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Frontend
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -64,11 +59,10 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app
+      - ../frontend:/app
       - /app/node_modules
     command: npm run dev -- --host
 
-  # Optional: Database admin 
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -79,7 +73,7 @@ services:
     depends_on:
       - postgres
 
-  volumes:
-    postgres_data:
-    redis_data:
-    file_storage:        
+volumes:
+  postgres_data:
+  redis_data:
+  file_storage:
