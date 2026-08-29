@@ -5,16 +5,16 @@
 
 name: Backend CI
 
-on: 
+on:
   push:
     branches: [ main, develop ]
-    paths: 
+    paths:
       - 'backend/**'
-      - '.github/workflow/backend-ci.yml'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
-      branches: [ main, develop ]
-      paths: 
-        - 'backend/**'
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
 
 jobs:
   test:
@@ -33,10 +33,10 @@ jobs:
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: test_db
         ports:
-          - 5432:5432 
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-intterval 10s
+          --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
@@ -45,10 +45,10 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "redis-cli ping"  
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
-          --health0-retries 5
+          --health-retries 5
 
     defaults:
       run:
@@ -63,29 +63,33 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: './backend/requirements.txt'
+          cache-dependency-path: './backend/requirements/*.txt'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio
+          pip install -r requirements/dev.txt -r requirements/test.txt
 
       - name: Create test environment
         run: |
           cp .env.example .env.test
-          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" >> env.test
-          echo "REDIS_URL="redis://localhost:6379" >> env.test
-          echo "SECRET_KEY=test-secret-key-for-ci" >> env.test
-          echo "JWT_ALGORITHM=HS256" >> env.test
+          echo "R2_ACCOUNT_ID=dummy" >> .env.test
+          echo "R2_ACCESS_KEY_ID=dummy" >> .env.test
+          echo "R2_SECRET_ACCESS_KEY=dummy" >> .env.test
+          echo "R2_BUCKET_NAME=dummy" >> .env.test
+          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" >> .env.test
+          echo "REDIS_URL=redis://localhost:6379" >> .env.test
+          echo "SECRET_KEY=test-secret-key-for-ci" >> .env.test
+          echo "JWT_ALGORITHM=HS256" >> .env.test
+          echo "ENCRYPTION_KEY=test-encryption-key-for-ci" >> .env.test
 
       - name: Setup DATABASE_URL
         run: |
-          # Wait for postgreSQL tobe ready
+          # Wait for postgreSQL to be ready
           timeout 30s bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done'
           # Run migrations
           alembic upgrade head
-          
+
       - name: Run linting and type check
         run: |
           pip install black flake8 mypy
@@ -95,11 +99,11 @@ jobs:
 
       - name: Run test with coverage
         run: |
-          pytestt --cov=app --cov-report=xml --cov-report=html tests/
+          pytest --cov=app --cov-report=xml --cov-report=html tests/
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
-        with: 
+        with:
           file: ./backend/coverage.xml
           flags: backend
           name: backend-coverage
@@ -114,47 +118,47 @@ jobs:
           retention-days: 7
 
   security-scan:
-      name: Security scan
-      runs-on: ubuntu-latest
+    name: Security scan
+    runs-on: ubuntu-latest
 
-      defaults:
-        run:
-          working-directory: ./backend
+    defaults:
+      run:
+        working-directory: ./backend
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Set up Python
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-        - name: Install security tools
-          run: |
-            pip install bandit safety pip-audit 
+      - name: Install security tools
+        run: |
+          pip install bandit safety pip-audit
 
-        - name: Run bandit security scan
-          run: |
-            bandit -r app/ -f json -o bandit-results.json || true
+      - name: Run bandit security scan
+        run: |
+          bandit -r app/ -f json -o bandit-results.json || true
 
-        - name: Run safety check
-          run: |
-            safety check --json --output safety-report.json || true
+      - name: Run safety check
+        run: |
+          safety check --json --output safety-report.json || true
 
-        - name: Run pip-audit
-          run: |
-            pip-audit -r requirements.txt --format json --output pip-audit-report.json || true
+      - name: Run pip-audit
+        run: |
+          pip-audit -r requirements/base.txt --format json --output pip-audit-report.json || true
 
-        - name: Upload security reports
-          uses: actions/upload-artifact@v4
-          with:
-            name: backend-security-reports
-            path: |
-              backend/bandit-results.json
-              backend/safety-report.json    
-              backend/pip-audit-report.json
-            retention-days: 30
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-security-reports
+          path: |
+            backend/bandit-results.json
+            backend/safety-report.json
+            backend/pip-audit-report.json
+          retention-days: 30
 
   build:
     name: Build Backend
@@ -171,15 +175,15 @@ jobs:
       - name: Build Docker image
         run: |
           cd backend
-          docker build -t backend:${{ github.sha }}
+          docker build -t backend:${{ github.sha }} .
 
       - name: Test Docker image
         run: |
-          docker run --rm backend:${{ github.sha }} python -c "import sys; print('Python OK')" 
+          docker run --rm backend:${{ github.sha }} python -c "import sys; print('Python OK')"
 
       - name: Upload Docker image
         uses: actions/upload-artifact@v4
         with:
-          name: backend-docker-image 
+          name: backend-docker-image
           path: backend/
-          retention-days: 7 
+          retention-days: 7
