@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./storage/uploads"
     MAX_FILE_SIZE: int = 104857600
 
-    ALLOWD_ORIGINS: str = "https://localhost:3000"
+    ALLOWED_ORIGINS: str = "http://localhost:3000"
 
     class Config:
         env_file = ".env"
