@@ -38,3 +38,20 @@ def db_session(tmp_path):
 @pytest.fixture()
 def client(db_session):
     return TestClient(fastapi_app)
+
+@pytest.fixture(autouse=True)
+def mock_storage(monkeypatch):
+    fake_storage = {}
+
+    def fake_upload(key, data):
+        fake_storage[key] = data
+
+    def fake_download(key):
+        return fake_storage[key]
+
+    def fake_delete(key):
+        fake_storage.pop(key, None)
+
+    monkeypatch.setattr("app.api.files.upload_object", fake_upload)
+    monkeypatch.setattr("app.api.files.download_object", fake_download)
+    monkeypatch.setattr("app.api.files.delete_object", fake_delete)

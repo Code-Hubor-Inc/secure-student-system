@@ -1,4 +1,3 @@
-import os
 import uuid
 from datetime import datetime, timezone
 
@@ -15,6 +14,7 @@ from app.models.user import User
 from app.schemas.file import FileOut
 from app.services.audit import log_action
 from app.services.encryption import decrypt_file, encrypt_file
+from app.services.storage import delete_object, download_object, upload_object
 
 router = APIRouter(prefix="/files", tags=["files"])
 
@@ -32,11 +32,8 @@ def upload_file(
 
     ciphertext, encrypted_dek, nonce = encrypt_file(content)
 
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     stored_filename = f"{uuid.uuid4().hex}.enc"
-    stored_path = os.path.join(settings.UPLOAD_DIR, stored_filename)
-    with open(stored_path, "wb") as f:
-        f.write(ciphertext)
+    upload_object(stored_filename, ciphertext)
 
     file_record = File(
         user_id=current_user.id,
@@ -86,10 +83,7 @@ def download_file(
     if file_record.expires_at and file_record.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=status.HTTP_410_GONE, detail="File has expired")
 
-    stored_path = os.path.join(settings.UPLOAD_DIR, file_record.stored_filename)
-    with open(stored_path, "rb") as f:
-        ciphertext = f.read()
-
+    ciphertext = download_object(file_record.stored_filename)
     plaintext = decrypt_file(ciphertext, file_record.encrypted_dek, file_record.nonce)
 
     log_action(
@@ -119,9 +113,7 @@ def delete_file(
     if not file_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
 
-    stored_path = os.path.join(settings.UPLOAD_DIR, file_record.stored_filename)
-    if os.path.exists(stored_path):
-        os.remove(stored_path)
+    delete_object(file_record.stored_filename)
 
     db.delete(file_record)
     db.commit()
