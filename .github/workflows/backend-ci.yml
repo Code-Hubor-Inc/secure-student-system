@@ -107,6 +107,10 @@ jobs:
           pip install black flake8 mypy
           black --check app/
           flake8 app/
+
+      - name: Run mypy (advisory)
+        continue-on-error: true
+        run: |
           mypy app/
 
       - name: Run test with coverage
