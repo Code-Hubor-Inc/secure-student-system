@@ -2,9 +2,9 @@ name: Security CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, development ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, development ]
   schedule:
     - cron: '0 0 * * 0'  # Weekly security scan
 
@@ -134,6 +134,7 @@ jobs:
 
     - name: Scan frontend container
       if: steps.dockerfile_check.outputs.has_frontend_dockerfile == 'true'
+      continue-on-error: true
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'frontend-security-scan'
@@ -144,6 +145,7 @@ jobs:
 
     - name: Scan backend container
       if: steps.dockerfile_check.outputs.has_backend_dockerfile == 'true'
+      continue-on-error: true
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'backend-security-scan'

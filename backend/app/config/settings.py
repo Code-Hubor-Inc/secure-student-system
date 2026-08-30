@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 from typing import List, Optional
 import os
 
+
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
 
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
 
     # File Storage
     UPLOAD_DIR: str = "./storage/uploads"
-    MAX_FILE_SIZE: int = 104_857_600 # 100MB
+    MAX_FILE_SIZE: int = 104_857_600  # 100MB
     ENCRYPTION: str = "encryption-key 32 bytes long"
 
     # Application
@@ -32,5 +33,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
 
 settings = Settings()

@@ -8,6 +8,7 @@ from app.models.user import User
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+
 def get_current_user(
     token: str = Depends(oauth2_schema),
     db: Session = Depends(get_db),
@@ -15,7 +16,7 @@ def get_current_user(
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"www-Authorization": "Bearer"}
+        headers={"www-Authorization": "Bearer"},
     )
 
     email = decode_access_token(token)
