@@ -84,16 +84,16 @@ jobs:
 
       - name: Create test environment
         run: |
-          cp .env.example .env.test
-          echo "R2_ACCOUNT_ID=dummy" >> .env.test
-          echo "R2_ACCESS_KEY_ID=dummy" >> .env.test
-          echo "R2_SECRET_ACCESS_KEY=dummy" >> .env.test
-          echo "R2_BUCKET_NAME=dummy" >> .env.test
-          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" >> .env.test
-          echo "REDIS_URL=redis://localhost:6379" >> .env.test
-          echo "SECRET_KEY=test-secret-key-for-ci" >> .env.test
-          echo "JWT_ALGORITHM=HS256" >> .env.test
-          echo "ENCRYPTION_KEY=test-encryption-key-for-ci" >> .env.test
+          cp .env.example .env
+          echo "R2_ACCOUNT_ID=dummy" >> .env
+          echo "R2_ACCESS_KEY_ID=dummy" >> .env
+          echo "R2_SECRET_ACCESS_KEY=dummy" >> .env
+          echo "R2_BUCKET_NAME=dummy" >> .env
+          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" >> .env
+          echo "REDIS_URL=redis://localhost:6379" >> .env
+          echo "SECRET_KEY=test-secret-key-for-ci" >> .env
+          echo "JWT_ALGORITHM=HS256" >> .env
+          echo "ENCRYPTION_KEY=test-encryption-key-for-ci" >> .env
 
       - name: Setup DATABASE_URL
         run: |
