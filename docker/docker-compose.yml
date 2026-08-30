@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
-  # Database
   postgres:
-    image: postgres:13
+    image: postgres:15
     environment:
       POSTGRES_DB: secure_student
       POSTGRES_USER: user
@@ -12,14 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - .scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d secure_student"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis for caching session
   redis:
     image: redis:7-alpine
     ports:
@@ -32,54 +27,53 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
   backend:
-    build: 
-      context: ./backend
-      dockerfile: dockerfile
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/secure_student
-      - REDIS_URL=redis://redis:6379
+      APP_NAME: "Secure Student System"
+      DEBUG: "true"
+      API_V1_STR: /api/v1
+      DATABASE_URL: postgresql://user:password@postgres:5432/secure_student
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: dev-secret-key
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      ENCRYPTION_KEY: dev-encryption-key
+      UPLOAD_DIR: ./storage/uploads
+      MAX_FILE_SIZE: "104857600"
+      ALLOWED_ORIGINS: http://localhost:3000
+      R2_ACCOUNT_ID: dev-account-id
+      R2_ACCESS_KEY_ID: dev-access-key-id
+      R2_SECRET_ACCESS_KEY: dev-secret-access-key
+      R2_BUCKET_NAME: dev-bucket
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-      volumes:
-         - ./backend:/app
-         - file_storage:/app/storage
-      command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../backend:/app
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
-  # Frontend
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app
+      - ../frontend:/app
       - /app/node_modules
     command: npm run dev -- --host
 
-  # Optional: Database admin 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-
-  volumes:
-    postgres_data:
-    redis_data:
-    file_storage:        
+volumes:
+  postgres_data:
+  redis_data:

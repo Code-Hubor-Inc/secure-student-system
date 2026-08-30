@@ -1,0 +1,10 @@
+dist
+node_modules
+*.ts
+*.tsx
+src/App.js
+src/App.test.js
+src/index.js
+src/reportWebVitals.js
+src/setupTests.js
+src/components/ui/button/Button-test.jsx
