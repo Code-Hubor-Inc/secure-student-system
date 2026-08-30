@@ -86,7 +86,7 @@ jobs:
       - name: Setup DATABASE_URL
         run: |
           # Wait for postgreSQL to be ready
-          timeout 30s bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done'
+          timeout 30s bash -c 'until pg_isready -h localhost -p 5432 -U test_user -d test_db; do sleep 1; done'
           # Run migrations
           alembic upgrade head
 
