@@ -95,7 +95,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t frontend:${{ github.sha }} -f frontend/Dockerfile ./frontend
+          docker build -t frontend:${{ github.sha }} -f Dockerfile .
 
       - name: Run security audit
         run: |
