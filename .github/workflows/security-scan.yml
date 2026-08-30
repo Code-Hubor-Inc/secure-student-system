@@ -2,9 +2,9 @@ name: Security CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, development ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, development ]
   schedule:
     - cron: '0 0 * * 0'  # Weekly security scan
 
