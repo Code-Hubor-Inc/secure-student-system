@@ -12,14 +12,15 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_recycle=300,
     echo=settings.DEBUG,
-    future=False
+    future=False,
 )
 
 # Create SessionLocal class
-SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create BAse class
 Base = declarative_base()
+
 
 # Dependency to get database session
 def get_db():

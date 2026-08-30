@@ -3,8 +3,9 @@ from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, LargeBinar
 from app.db.database import Base
 from app.models.base import BaseModel
 
+
 class File(Base, BaseModel):
-    __tablename__="files"
+    __tablename__ = "files"
 
     user_id = Column(ForeignKey("users.id"), nullable=False)
     institution_id = Column(ForeignKey("institutions.id"), nullable=True)

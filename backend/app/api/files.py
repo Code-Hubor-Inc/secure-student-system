@@ -1,7 +1,15 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File as FastAPIFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    UploadFile,
+    File as FastAPIFile,
+    status,
+)
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
@@ -28,7 +36,10 @@ def upload_file(
 ):
     content = upload.file.read()
     if len(content) > settings.MAX_FILE_SIZE:
-        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large")
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File too large",
+        )
 
     ciphertext, encrypted_dek, nonce = encrypt_file(content)
 
@@ -76,9 +87,15 @@ def download_file(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    file_record = db.query(File).filter(File.id == file_id, File.user_id == current_user.id).first()
+    file_record = (
+        db.query(File)
+        .filter(File.id == file_id, File.user_id == current_user.id)
+        .first()
+    )
     if not file_record:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
+        )
 
     if file_record.expires_at and file_record.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=status.HTTP_410_GONE, detail="File has expired")
@@ -98,7 +115,11 @@ def download_file(
     return Response(
         content=plaintext,
         media_type=file_record.content_type or "application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{file_record.original_filename}"'},
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{file_record.original_filename}"'
+            )
+        },
     )
 
 
@@ -109,9 +130,15 @@ def delete_file(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    file_record = db.query(File).filter(File.id == file_id, File.user_id == current_user.id).first()
+    file_record = (
+        db.query(File)
+        .filter(File.id == file_id, File.user_id == current_user.id)
+        .first()
+    )
     if not file_record:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
+        )
 
     delete_object(file_record.stored_filename)
 
